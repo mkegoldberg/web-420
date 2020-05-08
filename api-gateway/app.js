@@ -1,13 +1,35 @@
+/*
+============================================
+; Title:  API Gateway
+; Author: Mike Goldberg
+; Date:   May 4 2020
+; Description: REST
+;===========================================
+*/
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
+// var bodyParser = require('body-parser');
 var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
+
+var apiCatalog = require('./routes/api-catalog');
+var indexRouter = require('./routes/index');
+
 var app = express();
+
+/**
+*
+Database connection
+*/
+mongoose.connect('mongodb+srv://user-01:dbUser01@buwebdev-cluster-1-f4r04.mongodb.net/api-gateway', {
+  promiseLibrary: require('bluebird')
+}).then(() => console.log('connection successful'))
+  .catch((err) => console.error(err));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,20 +42,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('api', apiCatalog);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-/**
-*
-Database connection
-*/
-mongoose.connect('mongodb+srv://user-01:dbUser01@buwebdev-cluster-1-f4r04.mongodb.net/api-gateway', {
-  promiseLibrary: require('bluebird')
-}).then(() => console.log('connection successful'))
-  .catch((err) => console.error(err));
 
 // error handler
 app.use(function(err, req, res, next) {
